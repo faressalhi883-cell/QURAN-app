@@ -4,6 +4,8 @@
 
 const API_BASE = 'https://api.alquran.cloud/v1';
 let currentPage = 'quran';
+let adhanState = { loop: false, player: null };
+let ruqyahState = { loop: false, player: null };
 
 // ===== شاشة الترحيب =====
 setTimeout(() => {
@@ -19,6 +21,11 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const page = btn.dataset.page;
     if (page === currentPage) return;
+
+    // إيقاف أي صوت يعمل عند تغيير القسم
+    if (adhanState.player) { adhanState.player.stop(); adhanState.player = null; }
+    if (ruqyahState.player) { ruqyahState.player.stop(); ruqyahState.player = null; }
+    if (window.currentSurahAudio) { window.currentSurahAudio.pause(); window.currentSurahAudio = null; }
 
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
@@ -38,6 +45,9 @@ async function loadPage(page) {
     main.innerHTML = html;
 
     if (page === 'quran') initQuranPage();
+    if (page === 'adhan') initAdhanPage();
+    if (page === 'ruqyah') initRuqyahPage();
+    if (page === 'settings') initSettingsPage();
   } catch (err) {
     main.innerHTML = '<p class="error">حدث خطأ في تحميل القسم</p>';
     console.error(err);
@@ -135,6 +145,165 @@ function backToSurahs() {
     window.currentSurahAudio.pause();
     window.currentSurahAudio = null;
   }
+}
+
+// ==========================================
+// قسم الأذان
+// ==========================================
+function initAdhanPage() {
+  const select = document.getElementById('adhanSelect');
+  const playBtn = document.getElementById('adhanPlayBtn');
+  const loopBtn = document.getElementById('adhanLoopBtn');
+  const stopBtn = document.getElementById('adhanStopBtn');
+
+  if (!select) return;
+
+  const adhanList = [
+    { name: 'أذان الحرم المكي - عبدالرحمن السديس', url: 'https://www.islamcan.com/audio/adhan/azan1.mp3' },
+    { name: 'أذان الحرم المدني', url: 'https://www.islamcan.com/audio/adhan/azan2.mp3' },
+    { name: 'أذان مشاري العفاسي', url: 'https://www.islamcan.com/audio/adhan/azan8.mp3' },
+    { name: 'أذان المغرب - مؤذن مغاربي', url: 'https://www.islamcan.com/audio/adhan/azan10.mp3' },
+    { name: 'أذان مصر - مؤذن مصري', url: 'https://www.islamcan.com/audio/adhan/azan5.mp3' }
+  ];
+
+  select.innerHTML = adhanList.map((a, i) =>
+    `<option value="${i}">${a.name}</option>`
+  ).join('');
+
+  playBtn.onclick = () => {
+    const idx = select.value;
+    if (adhanState.player) adhanState.player.stop();
+    adhanState.player = new Howl({
+      src: [adhanList[idx].url],
+      html5: true,
+      loop: adhanState.loop,
+      onloaderror: () => alert('تعذر تحميل الأذان. تحقق من اتصالك بالإنترنت.')
+    });
+    adhanState.player.play();
+  };
+
+  loopBtn.onclick = () => {
+    adhanState.loop = !adhanState.loop;
+    if (adhanState.player) adhanState.player.loop(adhanState.loop);
+    loopBtn.textContent = adhanState.loop ? '🔁 تكرار: مفعل' : '🔁 تكرار: غير مفعل';
+    loopBtn.style.background = adhanState.loop ? '#238636' : '#30363d';
+  };
+
+  stopBtn.onclick = () => {
+    if (adhanState.player) { adhanState.player.stop(); adhanState.player = null; }
+  };
+}
+
+// ==========================================
+// قسم الرقية الشرعية
+// ==========================================
+function initRuqyahPage() {
+  const menu = document.getElementById('ruqyahMenu');
+  const content = document.getElementById('ruqyahContent');
+  const backBtn = document.getElementById('ruqyahBackBtn');
+  const title = document.getElementById('ruqyahTitle');
+  const player = document.getElementById('ruqyahAudio');
+  const playBtn = document.getElementById('ruqyahPlayBtn');
+  const loopBtn = document.getElementById('ruqyahLoopBtn');
+  const stopBtn = document.getElementById('ruqyahStopBtn');
+
+  if (!menu) return;
+
+  const ruqyahTypes = [
+    { id: 'general', name: '🤲 الرقية الشرعية العامة', url: 'https://server8.mp3quran.net/frs_a/001.mp3' },
+    { id: 'hasad', name: '🧿 رقية الحسد والعين', url: 'https://server8.mp3quran.net/frs_a/002.mp3' },
+    { id: 'sihr', name: '🪄 رقية السحر', url: 'https://server8.mp3quran.net/frs_a/003.mp3' },
+    { id: 'mass', name: '👤 رقية المس', url: 'https://server8.mp3quran.net/frs_a/004.mp3' },
+    { id: 'sickness', name: '🤒 رقية الأمراض والأوجاع', url: 'https://server8.mp3quran.net/frs_a/005.mp3' },
+    { id: 'sleep', name: '😴 رقية الأرق والقلق', url: 'https://server8.mp3quran.net/frs_a/006.mp3' },
+    { id: 'home', name: '🏠 رقية المنزل', url: 'https://server8.mp3quran.net/frs_a/007.mp3' },
+    { id: 'children', name: '👶 رقية الأطفال', url: 'https://server8.mp3quran.net/frs_a/008.mp3' }
+  ];
+
+  menu.innerHTML = ruqyahTypes.map(t =>
+    `<button class="ruqyah-card" data-id="${t.id}">${t.name}</button>`
+  ).join('');
+
+  menu.querySelectorAll('.ruqyah-card').forEach(card => {
+    card.onclick = () => {
+      const id = card.dataset.id;
+      const type = ruqyahTypes.find(t => t.id === id);
+      menu.style.display = 'none';
+      content.style.display = 'block';
+      backBtn.style.display = 'inline-block';
+      title.textContent = type.name;
+
+      if (ruqyahState.player) ruqyahState.player.stop();
+      ruqyahState.player = new Howl({
+        src: [type.url],
+        html5: true,
+        loop: ruqyahState.loop,
+        onloaderror: () => alert('تعذر تحميل الرقية. تحقق من اتصالك بالإنترنت.')
+      });
+      ruqyahState.player.play();
+    };
+  });
+
+  backBtn.onclick = () => {
+    content.style.display = 'none';
+    menu.style.display = 'flex';
+    backBtn.style.display = 'none';
+    title.textContent = '🤲 الرقية الشرعية';
+    if (ruqyahState.player) { ruqyahState.player.stop(); ruqyahState.player = null; }
+  };
+
+  playBtn.onclick = () => { if (ruqyahState.player) ruqyahState.player.play(); };
+  stopBtn.onclick = () => { if (ruqyahState.player) ruqyahState.player.stop(); };
+  loopBtn.onclick = () => {
+    ruqyahState.loop = !ruqyahState.loop;
+    if (ruqyahState.player) ruqyahState.player.loop(ruqyahState.loop);
+    loopBtn.textContent = ruqyahState.loop ? '🔁 تكرار: مفعل' : '🔁 تكرار: غير مفعل';
+    loopBtn.style.background = ruqyahState.loop ? '#238636' : '#30363d';
+  };
+}
+
+// ==========================================
+// قسم الإعدادات
+// ==========================================
+function initSettingsPage() {
+  const fontSelect = document.getElementById('fontSelect');
+  const fontSize = document.getElementById('fontSize');
+  const sizeValue = document.getElementById('sizeValue');
+  const themeSelect = document.getElementById('themeSelect');
+
+  if (!fontSelect) return;
+
+  const savedFont = localStorage.getItem('quran_font') || 'Amiri';
+  const savedSize = localStorage.getItem('quran_font_size') || '22';
+  const savedTheme = localStorage.getItem('quran_theme') || 'dark';
+
+  fontSelect.value = savedFont;
+  fontSize.value = savedSize;
+  sizeValue.textContent = savedSize;
+  themeSelect.value = savedTheme;
+
+  fontSelect.onchange = () => {
+    localStorage.setItem('quran_font', fontSelect.value);
+    document.body.style.fontFamily = fontSelect.value;
+  };
+
+  fontSize.oninput = () => {
+    localStorage.setItem('quran_font_size', fontSize.value);
+    sizeValue.textContent = fontSize.value;
+    const verses = document.getElementById('verses');
+    if (verses) verses.style.fontSize = fontSize.value + 'px';
+  };
+
+  themeSelect.onchange = () => {
+    localStorage.setItem('quran_theme', themeSelect.value);
+    if (themeSelect.value === 'light') {
+      document.body.style.background = '#f5f5f5';
+      document.body.style.color = '#1a1a1a';
+    } else {
+      document.body.style.background = '#0d1117';
+      document.body.style.color = '#fff';
+    }
+  };
 }
 
 // ===== زر الرجوع في الهاتف =====
