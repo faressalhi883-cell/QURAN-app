@@ -22,7 +22,6 @@ document.querySelectorAll('.nav-btn').forEach(btn => {
     const page = btn.dataset.page;
     if (page === currentPage) return;
 
-    // إيقاف أي صوت يعمل عند تغيير القسم
     if (adhanState.player) { adhanState.player.stop(); adhanState.player = null; }
     if (ruqyahState.player) { ruqyahState.player.stop(); ruqyahState.player = null; }
     if (window.currentSurahAudio) { window.currentSurahAudio.pause(); window.currentSurahAudio = null; }
@@ -210,14 +209,14 @@ function initRuqyahPage() {
   if (!menu) return;
 
   const ruqyahTypes = [
-    { id: 'general', name: '🤲 الرقية الشرعية العامة', url: 'https://server8.mp3quran.net/frs_a/001.mp3' },
-    { id: 'hasad', name: '🧿 رقية الحسد والعين', url: 'https://server8.mp3quran.net/frs_a/002.mp3' },
-    { id: 'sihr', name: '🪄 رقية السحر', url: 'https://server8.mp3quran.net/frs_a/003.mp3' },
-    { id: 'mass', name: '👤 رقية المس', url: 'https://server8.mp3quran.net/frs_a/004.mp3' },
-    { id: 'sickness', name: '🤒 رقية الأمراض والأوجاع', url: 'https://server8.mp3quran.net/frs_a/005.mp3' },
-    { id: 'sleep', name: '😴 رقية الأرق والقلق', url: 'https://server8.mp3quran.net/frs_a/006.mp3' },
-    { id: 'home', name: '🏠 رقية المنزل', url: 'https://server8.mp3quran.net/frs_a/007.mp3' },
-    { id: 'children', name: '👶 رقية الأطفال', url: 'https://server8.mp3quran.net/frs_a/008.mp3' }
+    { id: 'fatiha', name: '🤲 الرقية بالفاتحة', url: 'https://server8.mp3quran.net/frs_a/001.mp3' },
+    { id: 'baqara', name: '🧿 رقية الحسد والعين (البقرة)', url: 'https://server8.mp3quran.net/frs_a/002.mp3' },
+    { id: 'kahf', name: '🪄 رقية السحر (الكهف)', url: 'https://server8.mp3quran.net/frs_a/018.mp3' },
+    { id: 'yasin', name: '👤 رقية المس (يس)', url: 'https://server8.mp3quran.net/frs_a/036.mp3' },
+    { id: 'saffat', name: '🤒 رقية الأمراض (الصافات)', url: 'https://server8.mp3quran.net/frs_a/037.mp3' },
+    { id: 'rahman', name: '😴 رقية الأرق والقلق (الرحمن)', url: 'https://server8.mp3quran.net/frs_a/055.mp3' },
+    { id: 'mulk', name: '🏠 رقية المنزل (الملك)', url: 'https://server8.mp3quran.net/frs_a/067.mp3' },
+    { id: 'ikhlas', name: '👶 رقية الأطفال (الإخلاص والمعوذتين)', url: 'https://server8.mp3quran.net/frs_a/112.mp3' }
   ];
 
   menu.innerHTML = ruqyahTypes.map(t =>
@@ -233,14 +232,10 @@ function initRuqyahPage() {
       backBtn.style.display = 'inline-block';
       title.textContent = type.name;
 
-      if (ruqyahState.player) ruqyahState.player.stop();
-      ruqyahState.player = new Howl({
-        src: [type.url],
-        html5: true,
-        loop: ruqyahState.loop,
-        onloaderror: () => alert('تعذر تحميل الرقية. تحقق من اتصالك بالإنترنت.')
-      });
-      ruqyahState.player.play();
+      player.src = type.url;
+      player.loop = ruqyahState.loop;
+      player.load();
+      player.play().catch(e => console.log('Play error:', e));
     };
   });
 
@@ -249,14 +244,14 @@ function initRuqyahPage() {
     menu.style.display = 'flex';
     backBtn.style.display = 'none';
     title.textContent = '🤲 الرقية الشرعية';
-    if (ruqyahState.player) { ruqyahState.player.stop(); ruqyahState.player = null; }
+    if (player) { player.pause(); player.src = ''; }
   };
 
-  playBtn.onclick = () => { if (ruqyahState.player) ruqyahState.player.play(); };
-  stopBtn.onclick = () => { if (ruqyahState.player) ruqyahState.player.stop(); };
+  playBtn.onclick = () => { if (player) player.play(); };
+  stopBtn.onclick = () => { if (player) { player.pause(); player.currentTime = 0; } };
   loopBtn.onclick = () => {
     ruqyahState.loop = !ruqyahState.loop;
-    if (ruqyahState.player) ruqyahState.player.loop(ruqyahState.loop);
+    if (player) player.loop = ruqyahState.loop;
     loopBtn.textContent = ruqyahState.loop ? '🔁 تكرار: مفعل' : '🔁 تكرار: غير مفعل';
     loopBtn.style.background = ruqyahState.loop ? '#238636' : '#30363d';
   };
