@@ -175,7 +175,10 @@ body::before {
       ayahs.forEach(ayah => {
   let text = ayah.text;
   if (surahNumber != 1 && surahNumber != 9 && ayah.numberInSurah === 1) {
-    text = text.replace(/^بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\s*/, '');
+    let words = text.split(' ');
+if (words.length >= 4) {
+  text = words.slice(4).join(' ');
+}
     // إضافة البسملة كسطر منفصل
     html += `<div style="text-align: center; margin-bottom: 15px; color: #58a6ff; font-size: 22px;">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>`;
     // إضافة فاصل زخرفي
