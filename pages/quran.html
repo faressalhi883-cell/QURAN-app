@@ -1,0 +1,16 @@
+<div class="section-title">
+  <h2 id="pageTitle">📖 القرآن الكريم</h2>
+  <button id="backBtn" style="display:none;" class="btn" onclick="backToSurahs()">🔙 العودة للسور</button>
+</div>
+
+<div id="surahGrid" class="surah-grid">
+  <p class="loading" style="grid-column: 1/-1;">جاري تحميل السور...</p>
+</div>
+
+<div id="versesContainer" class="verses-container" style="display:none;">
+  <div id="verses"></div>
+  <div id="audioWrapper" class="audio-wrapper" style="display:none;">
+    <p>🎧 استماع (القارئ فارس عباد)</p>
+    <audio id="surahAudio" controls style="width:100%; border-radius:10px;"></audio>
+  </div>
+</div>
