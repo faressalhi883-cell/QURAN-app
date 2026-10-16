@@ -4,6 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>القرآن الكريم</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3370/3370291.png">
+<link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3370/3370291.png">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -16,7 +19,6 @@
     padding: 10px;
     min-height: 100vh;
   }
-  /* طبقة تعتيم لضمان وضوح النص فوق الصورة */
   body::before {
     content: "";
     position: fixed;
@@ -43,10 +45,9 @@
     cursor: pointer;
     font-family: inherit;
   }
-  /* شبكة السور (114 نافذة) */
   .surah-grid {
     display: grid;
-    grid-template-columns: repeat(3, 1fr); /* 3 أعمدة للهاتف */
+    grid-template-columns: repeat(3, 1fr);
     gap: 10px;
     padding-bottom: 30px;
   }
@@ -78,7 +79,6 @@
     font-size: 16px;
     font-weight: bold;
   }
-  /* حاوية الآيات */
   .verses-container {
     display: none;
     background: rgba(13, 17, 23, 0.95);
@@ -133,7 +133,6 @@
   const backBtn = document.getElementById('backBtn');
   const pageTitle = document.getElementById('pageTitle');
 
-  // 1. جلب قائمة السور وبناء الشبكة
   async function loadSurahs() {
     try {
       const res = await fetch(`${apiBase}/surah`);
@@ -156,7 +155,6 @@
     }
   }
 
-  // 2. جلب آيات السورة المختارة
   async function loadVerses(surahNumber, surahName) {
     surahGrid.style.display = 'none';
     versesContainer.style.display = 'block';
@@ -172,7 +170,6 @@
       
       ayahs.forEach(ayah => {
         let text = ayah.text;
-        // إزالة البسملة المكررة
         if (surahNumber != 1 && surahNumber != 9 && ayah.numberInSurah === 1) {
           text = text.replace(/^بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\s*/, '');
         }
@@ -185,7 +182,6 @@
     }
   }
 
-  // 3. زر العودة
   backBtn.onclick = () => {
     versesContainer.style.display = 'none';
     surahGrid.style.display = 'grid';
@@ -193,7 +189,6 @@
     pageTitle.textContent = '📖 القرآن الكريم';
   };
 
-  // تشغيل التطبيق
   loadSurahs();
 </script>
 </body>
