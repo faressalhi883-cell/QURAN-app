@@ -4,17 +4,12 @@
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0d1117",
-  "theme_color": "#238636",
+  "theme_color": "#6a0dad",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/3370/3370291.png",
-      "sizes": "192x192",
-      "type": "image/png"
-    },
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/3370/3370291.png",
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%236a0dad' rx='100'/><text x='50%' y='40%' font-family='sans-serif' font-size='70' fill='%23ffffff' text-anchor='middle' font-weight='bold'>القرآن</text><text x='50%' y='60%' font-family='sans-serif' font-size='70' fill='%23ffffff' text-anchor='middle' font-weight='bold'>الكريم</text></svg>",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/svg+xml"
     }
   ]
 }
