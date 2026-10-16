@@ -173,12 +173,16 @@ body::before {
       let html = '';
       
       ayahs.forEach(ayah => {
-        let text = ayah.text;
-        if (surahNumber != 1 && surahNumber != 9 && ayah.numberInSurah === 1) {
-          text = text.replace(/^بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\s*/, '');
-        }
-        html += `<span>${text} <span class="verse-number">${ayah.numberInSurah}</span></span> `;
-      });
+  let text = ayah.text;
+  if (surahNumber != 1 && surahNumber != 9 && ayah.numberInSurah === 1) {
+    text = text.replace(/^بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\s*/, '');
+    // إضافة البسملة كسطر منفصل
+    html += `<div style="text-align: center; margin-bottom: 15px; color: #58a6ff; font-size: 22px;">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>`;
+    // إضافة فاصل زخرفي
+    html += `<div style="text-align: center; margin-bottom: 20px; color: #238636; font-size: 24px;">۞ ۞ ۞</div>`;
+  }
+  html += `<span>${text} <span class="verse-number">${ayah.numberInSurah}</span></span> `;
+});
       versesDiv.innerHTML = html;
     } catch (err) {
       versesDiv.innerHTML = '<p class="error">حدث خطأ في تحميل الآيات. تأكد من اتصالك بالإنترنت.</p>';
