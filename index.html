@@ -5,213 +5,44 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>القرآن الكريم</title>
 <link rel="manifest" href="manifest.json">
-<link rel="apple-touch-icon" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="%236a0dad" rx="100"/><text x="50%" y="40%" font-family="sans-serif" font-size="70" fill="%23ffffff" text-anchor="middle" font-weight="bold">القرآن</text><text x="50%" y="60%" font-family="sans-serif" font-size="70" fill="%23ffffff" text-anchor="middle" font-weight="bold">الكريم</text></svg>'>
-<link rel="icon" type="image/svg+xml" href='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" fill="%236a0dad" rx="100"/><text x="50%" y="40%" font-family="sans-serif" font-size="70" fill="%23ffffff" text-anchor="middle" font-weight="bold">القرآن</text><text x="50%" y="60%" font-family="sans-serif" font-size="70" fill="%23ffffff" text-anchor="middle" font-weight="bold">الكريم</text></svg>'>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-  font-family: 'Amiri', 'Traditional Arabic', serif;
-  background-color: #0d1117;
-  color: #fff;
-  padding: 10px;
-  min-height: 100vh;
-  position: relative;
-}
-body::before {
-  content: "القرآن الكريم";
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) rotate(-30deg);
-  font-size: 80px;
-  color: rgba(255, 255, 255, 0.04);
-  z-index: -1;
-  white-space: nowrap;
-  font-weight: bold;
-  font-family: sans-serif;
-}
-  header {
-    text-align: center;
-    padding: 15px 0;
-    margin-bottom: 15px;
-    border-bottom: 1px solid rgba(255,255,255,0.2);
-  }
-  h1 { color: #58a6ff; font-size: 22px; }
-  #backBtn {
-    display: none;
-    background: #238636;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 20px;
-    font-size: 16px;
-    margin-top: 10px;
-    cursor: pointer;
-    font-family: inherit;
-  }
-  .surah-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
-    padding-bottom: 30px;
-  }
-  .surah-card {
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid #238636;
-    border-radius: 10px;
-    padding: 12px 5px;
-    text-align: center;
-    cursor: pointer;
-    transition: 0.2s;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    min-height: 70px;
-  }
-  .surah-card:active {
-    background: #238636;
-    transform: scale(0.95);
-  }
-  .surah-number {
-    font-size: 14px;
-    color: #58a6ff;
-    font-weight: bold;
-    margin-bottom: 4px;
-  }
-  .surah-name {
-    font-size: 16px;
-    font-weight: bold;
-  }
-  .verses-container {
-    display: none;
-    background: rgba(13, 17, 23, 0.95);
-    border-radius: 10px;
-    padding: 15px;
-    border: 1px solid #30363d;
-  }
-  #verses {
-    line-height: 2.5;
-    font-size: 22px;
-    text-align: justify;
-    word-spacing: 2px;
-    padding-bottom: 20px;
-  }
-  .verse-number {
-    display: inline-block;
-    background-color: #238636;
-    color: white;
-    border-radius: 50%;
-    width: 35px;
-    height: 35px;
-    line-height: 35px;
-    text-align: center;
-    font-size: 16px;
-    margin: 0 5px;
-    font-family: sans-serif;
-    vertical-align: middle;
-  }
-  .loading { text-align: center; font-size: 20px; color: #8b949e; margin-top: 50px; }
-  .error { color: #f85149; text-align: center; margin-top: 20px; }
-</style>
+<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3370/3370291.png">
+<link rel="icon" type="image/png" href="https://cdn-icons-png.flaticon.com/512/3370/3370291.png">
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<header>
-  <h1 id="pageTitle">📖 القرآن الكريم</h1>
-  <button id="backBtn">🔙 العودة للسور</button>
-</header>
 
-<div id="surahGrid" class="surah-grid">
-  <p class="loading" style="grid-column: 1/-1;">جاري تحميل السور...</p>
+<!-- شاشة الترحيب -->
+<div id="welcomeScreen">
+  <h1>📖 القرآن الكريم</h1>
+  <p>مرحباً بكم في تطبيق القرآن الكريم</p>
 </div>
 
-<div id="versesContainer" class="verses-container">
-  <div id="verses"></div>
+<!-- المحتوى الرئيسي (يتم تحميله ديناميكياً) -->
+<div id="mainContent">
+  <p style="text-align:center; margin-top:50px; color:#8b949e;">جاري التحميل...</p>
 </div>
 
-<script>
-  const apiBase = 'https://api.alquran.cloud/v1';
-  const surahGrid = document.getElementById('surahGrid');
-  const versesContainer = document.getElementById('versesContainer');
-  const versesDiv = document.getElementById('verses');
-  const backBtn = document.getElementById('backBtn');
-  const pageTitle = document.getElementById('pageTitle');
+<!-- شريط التنقل السفلي -->
+<nav id="bottomNav">
+  <button class="nav-btn active" data-page="quran">
+    <span class="nav-icon">📖</span>
+    <span class="nav-label">القرآن</span>
+  </button>
+  <button class="nav-btn" data-page="adhan">
+    <span class="nav-icon">🕌</span>
+    <span class="nav-label">الأذان</span>
+  </button>
+  <button class="nav-btn" data-page="ruqyah">
+    <span class="nav-icon">🤲</span>
+    <span class="nav-label">الرقية</span>
+  </button>
+  <button class="nav-btn" data-page="settings">
+    <span class="nav-icon">⚙️</span>
+    <span class="nav-label">الإعدادات</span>
+  </button>
+</nav>
 
-  async function loadSurahs() {
-    try {
-      const res = await fetch(`${apiBase}/surah`);
-      const data = await res.json();
-      surahGrid.innerHTML = '';
-      
-      data.data.forEach(surah => {
-        const card = document.createElement('div');
-        card.className = 'surah-card';
-        card.innerHTML = `
-          <div class="surah-number">${surah.number}</div>
-          <div class="surah-name">${surah.name.replace('سُورَةُ ', '')}</div>
-        `;
-        card.onclick = () => loadVerses(surah.number, surah.name);
-        surahGrid.appendChild(card);
-      });
-    } catch (err) {
-      surahGrid.innerHTML = '<p class="error" style="grid-column: 1/-1;">حدث خطأ في تحميل السور.</p>';
-      console.error(err);
-    }
-  }
-
-  async function loadVerses(surahNumber, surahName) {
-    surahGrid.style.display = 'none';
-    versesContainer.style.display = 'block';
-    backBtn.style.display = 'inline-block';
-    pageTitle.textContent = `📖 سورة ${surahName.replace('سُورَةُ ', '')}`;
-    versesDiv.innerHTML = '<p class="loading">جاري تحميل الآيات...</p>';
-
-    try {
-      const res = await fetch(`${apiBase}/surah/${surahNumber}`);
-      const data = await res.json();
-      const ayahs = data.data.ayahs;
-      let html = '';
-      
-      ayahs.forEach(ayah => {
-  let text = ayah.text;
-  if (surahNumber != 1 && surahNumber != 9 && ayah.numberInSurah === 1) {
-    let words = text.split(' ');
-if (words.length >= 4) {
-  text = words.slice(4).join(' ');
-}
-    // إضافة البسملة كسطر منفصل
-    html += `<div style="text-align: center; margin-bottom: 15px; color: #58a6ff; font-size: 22px;">بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ</div>`;
-    // إضافة فاصل زخرفي
-    html += `<div style="text-align: center; margin-bottom: 20px; color: #238636; font-size: 24px;">۞ ۞ ۞</div>`;
-  }
-  html += `<span>${text} <span class="verse-number">${ayah.numberInSurah}</span></span> `;
-});
-      versesDiv.innerHTML = html;
-     const audioPlayer = document.getElementById('surahAudio');
-if (audioPlayer) {
-    audioPlayer.src = `https://server8.mp3quran.net/frs_a/${String(surahNumber).padStart(3, '0')}.mp3`;
-    audioPlayer.load();
-    audioPlayer.loop = true;
-}
-    } catch (err) {
-      versesDiv.innerHTML = '<p class="error">حدث خطأ في تحميل الآيات. تأكد من اتصالك بالإنترنت.</p>';
-      console.error(err);
-    }
-  }
-
-  backBtn.onclick = () => {
-    versesContainer.style.display = 'none';
-    surahGrid.style.display = 'grid';
-    backBtn.style.display = 'none';
-    pageTitle.textContent = '📖 القرآن الكريم';
-  };
-
-  loadSurahs();
- window.addEventListener('popstate', function(event) {
-    if (versesContainer.style.display === 'block') {
-        backBtn.onclick();
-    }
-});
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
+<script src="js/app.js"></script>
 </body>
 </html>
