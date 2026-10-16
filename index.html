@@ -187,6 +187,12 @@ if (words.length >= 4) {
   html += `<span>${text} <span class="verse-number">${ayah.numberInSurah}</span></span> `;
 });
       versesDiv.innerHTML = html;
+     const audioPlayer = document.getElementById('surahAudio');
+if (audioPlayer) {
+    audioPlayer.src = `https://server8.mp3quran.net/frs_a/${String(surahNumber).padStart(3, '0')}.mp3`;
+    audioPlayer.load();
+    audioPlayer.loop = true;
+}
     } catch (err) {
       versesDiv.innerHTML = '<p class="error">حدث خطأ في تحميل الآيات. تأكد من اتصالك بالإنترنت.</p>';
       console.error(err);
@@ -201,6 +207,11 @@ if (words.length >= 4) {
   };
 
   loadSurahs();
+ window.addEventListener('popstate', function(event) {
+    if (versesContainer.style.display === 'block') {
+        backBtn.onclick();
+    }
+});
 </script>
 </body>
 </html>
