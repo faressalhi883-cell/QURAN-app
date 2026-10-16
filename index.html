@@ -8,37 +8,90 @@
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
     font-family: 'Amiri', 'Traditional Arabic', serif;
-    background-color: #0d1117;
-    color: #e6edf3;
-    padding: 15px;
+    background-image: url('https://images.unsplash.com/photo-1591604129939-f1efa4d9f7fa?q=80&w=1000&auto=format&fit=crop');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: #fff;
+    padding: 10px;
+    min-height: 100vh;
+  }
+  /* طبقة تعتيم لضمان وضوح النص فوق الصورة */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: -1;
   }
   header {
     text-align: center;
     padding: 15px 0;
-    border-bottom: 2px solid #238636;
-    margin-bottom: 20px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
   }
-  h1 { color: #58a6ff; font-size: 24px; }
-  select {
-    width: 100%;
-    padding: 12px;
-    font-size: 18px;
-    border-radius: 8px;
-    border: 1px solid #30363d;
-    background-color: #161b22;
-    color: #e6edf3;
-    margin-bottom: 20px;
+  h1 { color: #58a6ff; font-size: 22px; }
+  #backBtn {
+    display: none;
+    background: #238636;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 16px;
+    margin-top: 10px;
+    cursor: pointer;
     font-family: inherit;
+  }
+  /* شبكة السور (114 نافذة) */
+  .surah-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 أعمدة للهاتف */
+    gap: 10px;
+    padding-bottom: 30px;
+  }
+  .surah-card {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid #238636;
+    border-radius: 10px;
+    padding: 12px 5px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.2s;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 70px;
+  }
+  .surah-card:active {
+    background: #238636;
+    transform: scale(0.95);
+  }
+  .surah-number {
+    font-size: 14px;
+    color: #58a6ff;
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+  .surah-name {
+    font-size: 16px;
+    font-weight: bold;
+  }
+  /* حاوية الآيات */
+  .verses-container {
+    display: none;
+    background: rgba(13, 17, 23, 0.95);
+    border-radius: 10px;
+    padding: 15px;
+    border: 1px solid #30363d;
   }
   #verses {
     line-height: 2.5;
     font-size: 22px;
     text-align: justify;
     word-spacing: 2px;
-  }
-  .verse {
-    display: inline;
-    padding: 2px 0;
+    padding-bottom: 20px;
   }
   .verse-number {
     display: inline-block;
@@ -60,57 +113,70 @@
 </head>
 <body>
 <header>
-  <h1>📖 القرآن الكريم</h1>
+  <h1 id="pageTitle">📖 القرآن الكريم</h1>
+  <button id="backBtn">🔙 العودة للسور</button>
 </header>
 
-<select id="surahSelect">
-  <option value="">جاري تحميل السور...</option>
-</select>
+<div id="surahGrid" class="surah-grid">
+  <p class="loading" style="grid-column: 1/-1;">جاري تحميل السور...</p>
+</div>
 
-<div id="verses">
-  <p class="loading">اختر سورة من القائمة لعرض الآيات</p>
+<div id="versesContainer" class="verses-container">
+  <div id="verses"></div>
 </div>
 
 <script>
   const apiBase = 'https://api.alquran.cloud/v1';
-  const surahSelect = document.getElementById('surahSelect');
+  const surahGrid = document.getElementById('surahGrid');
+  const versesContainer = document.getElementById('versesContainer');
   const versesDiv = document.getElementById('verses');
+  const backBtn = document.getElementById('backBtn');
+  const pageTitle = document.getElementById('pageTitle');
 
-  // 1. جلب قائمة السور
+  // 1. جلب قائمة السور وبناء الشبكة
   async function loadSurahs() {
     try {
       const res = await fetch(`${apiBase}/surah`);
       const data = await res.json();
-      surahSelect.innerHTML = '<option value="">-- اختر سورة --</option>';
+      surahGrid.innerHTML = '';
+      
       data.data.forEach(surah => {
-        const option = document.createElement('option');
-        option.value = surah.number;
-        option.textContent = `${surah.number}. ${surah.name} (${surah.englishName})`;
-        surahSelect.appendChild(option);
+        const card = document.createElement('div');
+        card.className = 'surah-card';
+        card.innerHTML = `
+          <div class="surah-number">${surah.number}</div>
+          <div class="surah-name">${surah.name.replace('سُورَةُ ', '')}</div>
+        `;
+        card.onclick = () => loadVerses(surah.number, surah.name);
+        surahGrid.appendChild(card);
       });
     } catch (err) {
-      surahSelect.innerHTML = '<option value="">خطأ في التحميل</option>';
+      surahGrid.innerHTML = '<p class="error" style="grid-column: 1/-1;">حدث خطأ في تحميل السور.</p>';
       console.error(err);
     }
   }
 
   // 2. جلب آيات السورة المختارة
-  async function loadVerses(surahNumber) {
-    if (!surahNumber) return;
+  async function loadVerses(surahNumber, surahName) {
+    surahGrid.style.display = 'none';
+    versesContainer.style.display = 'block';
+    backBtn.style.display = 'inline-block';
+    pageTitle.textContent = `📖 سورة ${surahName.replace('سُورَةُ ', '')}`;
     versesDiv.innerHTML = '<p class="loading">جاري تحميل الآيات...</p>';
+
     try {
       const res = await fetch(`${apiBase}/surah/${surahNumber}`);
       const data = await res.json();
       const ayahs = data.data.ayahs;
       let html = '';
+      
       ayahs.forEach(ayah => {
-        // إزالة البسملة من أول آية إذا كانت السورة ليست الفاتحة أو التوبة (لتجنب التكرار)
         let text = ayah.text;
+        // إزالة البسملة المكررة
         if (surahNumber != 1 && surahNumber != 9 && ayah.numberInSurah === 1) {
-          // إزالة البسملة من بداية النص إن وجدت
           text = text.replace(/^بِسْمِ اللَّهِ الرَّحْمَٰنِ الرَّحِيمِ\s*/, '');
         }
-        html += `<span class="verse">${text} <span class="verse-number">${ayah.numberInSurah}</span></span> `;
+        html += `<span>${text} <span class="verse-number">${ayah.numberInSurah}</span></span> `;
       });
       versesDiv.innerHTML = html;
     } catch (err) {
@@ -119,10 +185,13 @@
     }
   }
 
-  // 3. الأحداث
-  surahSelect.addEventListener('change', (e) => {
-    loadVerses(e.target.value);
-  });
+  // 3. زر العودة
+  backBtn.onclick = () => {
+    versesContainer.style.display = 'none';
+    surahGrid.style.display = 'grid';
+    backBtn.style.display = 'none';
+    pageTitle.textContent = '📖 القرآن الكريم';
+  };
 
   // تشغيل التطبيق
   loadSurahs();
